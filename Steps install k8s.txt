@@ -132,3 +132,12 @@ spec:
 # Quando crio o deploymnt automaticamente ele cria o replicaset
 
 kubectl apply -f deployment.yaml
+
+# Para atualizar a imagem 
+kubectl set image deployment meudeployment web=kubedevio/web-page:green
+
+# Para ver histórico de rollout
+kubectl rollout history deployment meudeployment
+
+# Rodar aplicação
+kubectl port-forward pod/meudeployment 8080:80
