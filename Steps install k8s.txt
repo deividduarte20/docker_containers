@@ -1,0 +1,134 @@
+# Primeiro instalar o k3d
+# Instalar o kubectl
+
+# Primeiro criar cluster
+k3d cluster create
+
+# Criar cluster com resiliência
+k3d cluster creaate meucluster --servers 3 --agents 3
+
+# Para colocar nome no cluster
+k3d cluster create meucluster
+
+# Para excluir cluster
+k3d cluster delete meucluster
+
+# Listar nodes
+kubectl get nodes
+
+# Para descobrir informação do campo apiVersion:
+kubctl api-resources | grep pod
+
+# Criar arquivo de manifesto pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name:  meupod
+spec:
+  containers:
+    - name: web
+      image: deividdua32/conversao-temperatura:v1
+      ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name:  meupod-label
+  labels:
+    app: web
+spec:
+  containers:
+    - name: web
+      image: deividdua32/conversao-temperatura:v1
+      ports:
+        - containerPort: 80
+
+
+
+# Para aplicar o manifesto de pods
+kubectl create -f pod.yaml
+
+# Pode ser usado o apply sempre usar o apply
+kubectl apply -f pod.yaml
+
+# Listar pods
+kubectl get pods
+
+NAME	READY	STATUS			RESTARTS	AGE
+meupod	 0/1	ContainerCreating	   0		24s
+      container pronto/Quantidade de containers 
+# Ver em tempo real
+watch 'kubectl get pods'
+
+# Ver detalhes do pod
+kubectl describe pod/nome_pod
+
+# Para vincular porta local com a porta do pod
+kubectl port-forward pod/nome_pod 8080:80
+A porta 8080 é da máquina local
+
+# Deletar pod
+kubectl delete pod meupod
+
+# Replicaset gerencia os pods
+# Label chave e valor para marcar o objeto como nome, versão
+# Selector para selecionar a Label
+
+# Para pesquisar pod por label
+kubectl get pods -l app=web
+
+A função do replicaset ele faz com que eu tenha sempre o número de pods que foi definido na criação
+
+# Criar replicaset.yaml
+appVersion: v1
+kind: Replicaset
+metadata:
+  name: meureplicaset
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+    spec:
+      containers:
+        - name: web
+          image: deividdua32/conversao-temperatura:v1
+          ports:
+            - containerPort: 80
+
+# Para consultar se tem replicaset
+kubectl get replicaset
+
+# Para escalar manual
+kubectl scale replicaset nome_replicaset --replicas 10
+
+# Deployment serve para gerenciar troca de versões ele está acima do replicaset evita downtime e até faz roolback
+
+
+deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meudeployment
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+    spec:
+      containers:
+        - name: web
+          image: deividdua32/conversao-temperatura:v1
+          ports:
+            - containerPort: 80
+# Quando crio o deploymnt automaticamente ele cria o replicaset
+
+kubectl apply -f deployment.yaml
